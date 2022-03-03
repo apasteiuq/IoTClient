@@ -7,11 +7,20 @@ import SetTemp from './components/SetTemp'
 const App = () => {
   const [showSetTemp, setShowSetTemp] = useState(false)
   const [temps, setTemps] = useState([])
+  const [tempGrid, setTempGrid] = useState([])
 
   useEffect(() => {
     const getTemps = async () => {
       const tempsFromServer = await fetchTemps()
       setTemps(tempsFromServer)
+      let tempGridFromServer = []
+      for(const key in tempsFromServer) {
+        for(const time in tempsFromServer[key]) {
+          tempGridFromServer.push({ id: key, time: time, temperature: tempsFromServer[key][time]})
+        }
+      }
+      tempGridFromServer = tempGridFromServer.sort((a, b) => b.time - a.time)
+      setTempGrid(tempGridFromServer)
     }
 
     getTemps()
@@ -50,11 +59,30 @@ const App = () => {
             element={
               <>
                 {showSetTemp && <SetTemp onSetTemp={setTemp} />}
-                <Chart data={temps} length={20}/>
+                <Chart data={temps} length={25}/>
               </>
             }
           />
         </Routes>
+        <h3>Data grid</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Id</th>
+              <th>Temperture</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tempGrid.map((item) => (
+              <tr>
+                <td>{item.time}</td>
+                <td>{item.id}</td>
+                <td>{item.temperature}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </Router>
   )
